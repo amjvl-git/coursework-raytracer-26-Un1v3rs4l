@@ -30,7 +30,10 @@ class Vec3
     }
     
     // Calculate the dot product of this vector with the other and return the result
-    dot(other) {}
+    dot(other) {
+        DotP = this.x * other.x + this.y * other.y + this.z * other.z
+        return DotP
+    }
 
     // Calculate and return the magnitude of this vector
     magnitude() {
@@ -51,7 +54,14 @@ class Vec3
     }
 
     // Return a normalised version of this vector
-    normalised() {}
+    normalised() {
+        Xsq = Math.pow(this.x, 2)
+        Ysq = Math.pow(this.y, 2)
+        Zsq = Math.pow(this.z, 2)
+        Mnorm = 1 / Math.sqrt(Xsq + Ysq + Zsq)
+        Vnorm = this.x * Mnorm, this.y * Mnorm, this.z * Mnorm
+        return Vnorm
+    }
 }
 
 // A sphere in 3D space. Has centre, radius and colour all of which are Vec3s
