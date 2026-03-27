@@ -78,7 +78,19 @@ class Sphere
     // a quadratic equation and return the t value of the ray for that point
     // If two solutions exist return the minus solution
     // If no solutions exist return -1
-    rayIntersects(ray)  {}
+    rayIntersects(ray)  {
+        ray.origin = o
+        this.centre = c
+        Rsq = Math.pow(this.radius, 2)
+        a = d * d
+        b = 2 * d * (o - c)
+        c = (o - c) * (o - c) - Rsq
+        determinant = Math.pow(b, 2) - 4 * a * c
+        if (determinant > 0)
+            return -b - Math.sqrt(Math.pow(b, 2)- 4 * a * c) / 2 * a
+        else (determinant < 0)
+        return -1
+    }
 }
 
 // Ray which has an origin and direction, both are Vec3s
@@ -91,7 +103,9 @@ class Ray
     }
 
     // Calculate and return the point in space (a Vec3) for this ray for the given value of t
-    pointAt(t) {}
+    pointAt(t) {
+        return new Vec3(this.origin + this.direction * t)
+    }
 }
 
 // The result of casting a ray into our scene
@@ -122,13 +136,19 @@ function miss()
 // Check whether a ray hits anything in the scene and return a RayCast Result
 function traceRay(ray)
 {
-    return miss()
+    let sphere = spheres[0];
+    let t = sphere.rayIntersects(ray)
+    if(t < 0)return miss()
+    else return hit(ray, t, 0)
 }
 
 // Calculate and return the background colour based on the ray
 function backgroundColour(ray)
 {
-        return new Vec3(0.3,0.5,0.9) // Blue
+    let white = new Vec3(1, 1, 1) // White
+    let blue = new Vec3(0.3,0.5,0.9) // Blue
+    t = 0.5*(ray.direction.y + 1.0)
+    return white.scale(1-t).add(blue.scale(t))
 }
 
 // Returns the colour the ray should have as a Vec3 with RGB values in [0,1]
@@ -160,12 +180,28 @@ let imageWidth = document.getElementById("canvas").width
 let imageHeight = document.getElementById("canvas").height
 let aspectRatio = document.getElementById("canvas").height / document.getElementById("canvas").width
 
+let viewportWidth = 2
+let viewportHeight = viewportWidth * aspectRatio
+let focalLength = 1.0
+
+let camPosition = new Vec3(0,0,0)
+let horizontal = new Vec3(viewportWidth, 0, 0)
+let vertical = new Vec3(0, viewportHeight, 0)
+let lowerLeftCorner = camPosition.minus(horizontal.scale(0.5)).minus(vertical.scale(0.5)).minus(new Vec3(0, 0, focalLength))
+
 let colour = new Vec3(0,0,0)
 
 for (let i = 0; i < imageWidth; i++)
 {
     for (let j = 0; j <= imageHeight; j++)
     {
+        let u = i / (imageWidth - 1)
+        let v = j / (imageHeight - 1)
+        colour.x = u * 255
+        colour.y = v * 255
+
+        let ray = new Ray(camPosition, lowerLeftCorner.add(horizontal.scale(u)).add(vertical.scale(v)).minus(camPosition))
+        colour = rayColour(ray).scale(255)
         setPixel(i,j,colour)
     }
 }
